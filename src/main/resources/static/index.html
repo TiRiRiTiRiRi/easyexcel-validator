@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta charset="UTF-8">
+    <title>Basic DataGrid - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="demo/demo.css">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.easyui.min.js"></script>
+</head>
+<body>
+
+<!--<table id="dg" class="easyui-datagrid" title="人员信息表" style="width:670px;height:250px"-->
+<!--       data-options="rownumbers:true,singleSelect:true,url:'datagrid_data1.json',method:'get',autoRowHeight:false,pagination:true, pageSize:10,toolbar:'#tb'">-->
+<!--&lt;!&ndash;    <thead>&ndash;&gt;-->
+<!--&lt;!&ndash;    <tr>&ndash;&gt;-->
+<!--&lt;!&ndash;        <th data-options="field:'ck',checkbox:true"></th>&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <th data-options="field:'itemid',width:80">姓名</th>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <th data-options="field:'productid',width:100">姓名全拼</th>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <th data-options="field:'listprice',width:80,align:'center'">性别</th>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <th data-options="field:'unitcost',width:80,align:'center'">省份证号码</th>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <th data-options="field:'unitcost',width:80,align:'center'">出生日期</th>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <th data-options="field:'unitcost',width:80,align:'center'">手机号</th>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <th data-options="field:'unitcost',width:80,align:'center'">电子邮箱</th>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    </tr>&ndash;&gt;-->
+<!--&lt;!&ndash;    </thead>&ndash;&gt;-->
+<!--</table>-->
+<!--表格工具栏-->
+<!--<div id="tb" style="padding:5px;height:auto">-->
+<!--    <div style="margin-bottom:5px">-->
+<!--        <a href="javascript:void(0);" onclick="exp()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>-->
+<!--        <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a>-->
+<!--        <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>-->
+<!--        <a href="javascript:void(0);" onclick="downloadTemplate()" class="easyui-linkbutton" iconCls="icon-ok"-->
+<!--           plain="true">下载excel模板</a>-->
+<!--        <a href="#" class="easyui-linkbutton" iconCls="icon-back" plain="true">导入</a>-->
+<!--        <a href="javascript:void(0);" onclick="downloadData()" class="easyui-linkbutton" iconCls="icon-save"-->
+<!--           plain="true">导出Excel</a>-->
+<!--        <div>-->
+<!--            &lt;!&ndash;搜索框&ndash;&gt;-->
+<!--            <input id="ss" class="easyui-searchbox" style="width:300px" data-options="menu:'#box'"></input>-->
+<!--            &lt;!&ndash;频道按钮&ndash;&gt;-->
+<!--            <div id="box" style="width:120px">-->
+<!--                <div data-options="name:'all',iconCls:'icon-ok'">体育</div>-->
+<!--                <div data-options="name:'sports'">建材</div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--表单-->
+<div class="easyui-panel" title="New Topic" style="width:400px">
+    <div style="padding:10px 60px 20px 60px">
+        <form id="ff" method="post">
+            <table cellpadding="5">
+                <tr>
+                    <td>姓名:</td>
+                    <td><input class="easyui-textbox" type="text" style="width:50px" name="name"
+                               data-options="required:true"></input></td>
+                </tr>
+                <tr>
+                    <td>姓名全拼:</td>
+                    <td><input class="easyui-textbox" type="text" name="email"
+                               data-options="required:true,validType:'email'" style="width:50px"></input></td>
+                </tr>
+                <tr>
+                    <td>性别:</td>
+                    <td>
+                        <select class="easyui-combobox" name="language" style="width:50px">
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Message:</td>
+                    <td><input class="easyui-textbox" name="message" data-options="multiline:true"
+                               style="height:60px"></input></td>
+                </tr>
+            </table>
+        </form>
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">Submit</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()">Clear</a>
+        </div>
+    </div>
+</div>
+
+
+<table id="tb"></table>
+<script>
+
+    $(function() {
+        //页面加载完成后，创建数据表格datagrid
+        $("#tb").datagrid(
+            {
+                //定义标题行所有的列，注意这是一个二维数组
+                columns : [ [ {
+                    title : '编号',
+                    field : 'id',
+                    checkbox : true
+                }, {
+                    title : '姓名',
+                    field : 'name'
+                }, {
+                    title : '姓名',
+                    field : 'nameSpelling'
+                }, {
+                    title : '姓名全拼',
+                    field : 'nameSpelling'
+                } , {
+                    title : '性别',
+                    field : 'gender'
+                } , {
+                    title : '身份证件类型',
+                    field : 'identityCardType'
+                } , {
+                    title : '身份证件号码',
+                    field : 'identityCardNumber'
+                } , {
+                    title : '出生日期',
+                    field : 'birthday'
+                } , {
+                    title : '手机号码',
+                    field : 'phone'
+                } , {
+                    title : '电子邮箱',
+                    field : 'email'
+                }  ] ],
+                //指定数据表格发送ajax请求的地址
+                url : 'http://localhost/api/personalInformation/getMessage',
+                <!--使用独立的一列显示行数-->
+                rownumbers : true,
+                singleSelect : true,
+                //定义工具栏
+                toolbar : [ {
+                    text : '添加',
+                    iconCls : 'icon-add',
+                    //为按钮绑定单击事件
+                    handler : function() {
+                        alert('add...');
+                    }
+                }, {
+                    text : '删除',
+                    iconCls : 'icon-remove'
+                }, {
+                    text : '修改',
+                    iconCls : 'icon-edit'
+                }, {
+                    text : '查询',
+                    iconCls : 'icon-search'
+                } ],
+                //显示分页条
+                pagination : true,
+
+                //显示分页的条数
+                pageList : [ 3, 5, 7, 10 ]
+            });
+    });
+
+    // 导出模板
+    function downloadTemplate() {
+        window.open("http://localhost:80/api/personalInformation/exportTemplate")
+    }
+
+    // 导出数据
+    function downloadData() {
+        window.open("http://localhost:80/api/personalInformation/export")
+    }
+
+
+    function submitForm() {
+        $('#ff').form('submit');
+    }
+
+    function clearForm() {
+        $('#ff').form('clear');
+    }
+
+
+    $(function () {
+        $('#ss').searchbox({
+            searcher: function (value, name) {
+                alert(value + ',' + name);
+            },
+            menu: '#box',
+            prompt: '请输入内容',
+        });
+    });
+
+    function getData() {
+        var rows = [];
+        for (var i = 1; i <= 800; i++) {
+            var amount = Math.floor(Math.random() * 1000);
+            var price = Math.floor(Math.random() * 1000);
+            rows.push({
+                inv: 'Inv No ' + i,
+                date: $.fn.datebox.defaults.formatter(new Date()),
+                name: 'Name ' + i,
+                amount: amount,
+                price: price,
+                cost: amount * price,
+                note: 'Note ' + i
+            });
+        }
+        return rows;
+    }
+
+    function pagerFilter(data) {
+        if (typeof data.length == 'number' && typeof data.splice == 'function') {	// is array
+            data = {
+                total: data.length,
+                rows: data
+            }
+        }
+        var dg = $(this);
+        var opts = dg.datagrid('options');
+        var pager = dg.datagrid('getPager');
+        pager.pagination({
+            onSelectPage: function (pageNum, pageSize) {
+                opts.pageNumber = pageNum;
+                opts.pageSize = pageSize;
+                pager.pagination('refresh', {
+                    pageNumber: pageNum,
+                    pageSize: pageSize
+                });
+                dg.datagrid('loadData', data);
+            }
+        });
+        if (!data.originalRows) {
+            data.originalRows = (data.rows);
+        }
+        var start = (opts.pageNumber - 1) * parseInt(opts.pageSize);
+        var end = start + parseInt(opts.pageSize);
+        data.rows = (data.originalRows.slice(start, end));
+        return data;
+    }
+
+    $(function () {
+        $('#dg').datagrid({loadFilter: pagerFilter}).datagrid('loadData', getData());
+    });
+</script>
+
+</body>
+</html>
