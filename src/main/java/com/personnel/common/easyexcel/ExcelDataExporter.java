@@ -1,4 +1,4 @@
-package com.personnel.common.easyexecl;
+package com.personnel.common.easyexcel;
 
 import com.alibaba.excel.EasyExcel;
 

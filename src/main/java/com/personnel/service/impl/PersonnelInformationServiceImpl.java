@@ -13,8 +13,8 @@ import com.personnel.common.dto.UserInformationDeleteDto;
 import com.personnel.common.dto.UserInformationDto;
 import com.personnel.common.dto.UserInformationExcelDto;
 import com.personnel.common.dto.UserInformationUpdateDto;
-import com.personnel.common.easyexecl.ExcelDataExporter;
-import com.personnel.common.easyexecl.ExcelDataProcessor;
+import com.personnel.common.easyexcel.ExcelDataProcessor;
+import com.personnel.common.easyexcel.ExcelTemplateUtil;
 import com.personnel.common.exception.BaseException;
 import com.personnel.common.result.Result;
 import com.personnel.common.vo.PersonnelInformationVo;
@@ -107,9 +107,10 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
         createExcel(response, convertList, "总数据");
     }
 
+    @SneakyThrows
     @Override
     public void exportTemplate(HttpServletResponse response) {
-        createExcel(response, CollUtil.newArrayList(new UserInformationDto()), "模板");
+        ExcelTemplateUtil.downloadTemplate(response, "模板", "sheet1", UserInformationExcelDto.class);
     }
 
     @SneakyThrows

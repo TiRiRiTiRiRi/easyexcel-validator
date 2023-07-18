@@ -1,13 +1,10 @@
-package com.personnel.common.easyexecl;
+package com.personnel.common.easyexcel;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.personnel.common.exception.BaseException;
-import com.personnel.mapper.PersonnelInformationMapper;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.validation.ConstraintViolation;
@@ -17,6 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 处理导入数据格式
+ * @param <T>
+ */
 @Component
 public class ExcelDataProcessor<T> {
     private final Validator validator;
