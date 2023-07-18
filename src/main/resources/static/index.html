@@ -51,21 +51,21 @@
         $('#name').textbox();
         $('#nameSpelling').textbox();
         $('#gender').combobox({
-            valueField: 'id',
+            valueField: 'text',
             textField: 'text',
-            data: [{id: '1', text: '男'}, {id: '2', text: '女'}],
+            data: [{text: '男'}, {text: '女'}],
             required: true
         });
         $('#identityCardType').combobox({
-            valueField: 'id',
+            valueField: 'text',
             textField: 'text',
             data: [
-                {id: '1', text: '居民身份证'},
-                {id: '2', text: '士官证'},
-                {id: '3', text: '学生证'},
-                {id: '4', text: '驾驶证'},
-                {id: '5', text: '护照'},
-                {id: '6', text: '港澳通行证'}
+                {text: '居民身份证'},
+                {text: '士官证'},
+                {text: '学生证'},
+                {text: '驾驶证'},
+                {text: '护照'},
+                {text: '港澳通行证'}
             ],
             required: true
         });
