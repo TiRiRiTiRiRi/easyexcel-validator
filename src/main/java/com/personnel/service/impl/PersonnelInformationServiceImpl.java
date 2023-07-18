@@ -62,6 +62,7 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
 
         Page<PersonnelInformation> rowPage = new Page<>(qo.getPageNo(), qo.getPageSize());
         LambdaQueryWrapper<PersonnelInformation> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByDesc(PersonnelInformation::getCreateTime);
         rowPage = this.baseMapper.selectPage(rowPage, queryWrapper);
         return new PagingVo<>(rowPage).convert(PersonnelInformationVo.class);
     }

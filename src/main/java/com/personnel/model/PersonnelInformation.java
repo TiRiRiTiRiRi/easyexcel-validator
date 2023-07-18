@@ -2,6 +2,7 @@ package com.personnel.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.personnel.common.base.entity.BaseEntity;
 import lombok.Data;
 import lombok.experimental.Accessors;
