@@ -3,6 +3,7 @@ package com.personnel.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -56,9 +57,12 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
 
     @Override
     public PagingVo<PersonnelInformationVo> getMessage(PagingQo qo) {
-        IPage<PersonnelInformation> page = new Page<>(qo.getPageNo(), qo.getPageSize());
-        IPage<PersonnelInformation> pageData = this.lambdaQuery().page(page);
-        return new PagingVo<>(pageData).convert(PersonnelInformationVo.class);
+        System.out.println("qo = " + qo);
+
+        Page<PersonnelInformation> rowPage = new Page<>(qo.getPageNo(), qo.getPageSize());
+        LambdaQueryWrapper<PersonnelInformation> queryWrapper = new LambdaQueryWrapper<>();
+        rowPage = this.baseMapper.selectPage(rowPage, queryWrapper);
+        return new PagingVo<>(rowPage).convert(PersonnelInformationVo.class);
     }
 
     @Override
@@ -93,19 +97,20 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
         List<PersonnelInformation> list = this.lambdaQuery().orderByDesc(BaseEntity::getCreateTime).list();
         System.out.println("list = " + list);
         List<UserInformationExcelDto> convertList = list.stream().map(
-                entity ->
-                        new UserInformationExcelDto()
-                                .setName(entity.getName())
-                                .setNameSpelling(entity.getNameSpelling())
-                                .setGender(entity.getGender())
-                                .setIdentityCardType(entity.getIdentityCardType())
-                                .setIdentityCardNumber(entity.getIdentityCardNumber())
-                                .setBirthday(entity.getBirthday())
-                                .setPhone(entity.getPhone())
-                                .setEmail(entity.getEmail())
-
+                entity -> {
+                    UserInformationExcelDto userInformationExcelDto = new UserInformationExcelDto();
+                    userInformationExcelDto.setName(entity.getName());
+                    userInformationExcelDto.setNameSpelling(entity.getNameSpelling());
+                    userInformationExcelDto.setGender(entity.getGender());
+                    userInformationExcelDto.setIdentityCardType(entity.getIdentityCardType());
+                    userInformationExcelDto.setIdentityCardNumber(entity.getIdentityCardNumber());
+                    userInformationExcelDto.setBirthday(entity.getBirthday());
+                    userInformationExcelDto.setPhone(entity.getPhone());
+                    userInformationExcelDto.setEmail(entity.getEmail());
+                    return userInformationExcelDto;
+                }
         ).toList();
-        ExcelDataExporter.exportDataToExcel(convertList,response, UserInformationExcelDto.class,"总数据");
+        ExcelDataExporter.exportDataToExcel(convertList, response, UserInformationExcelDto.class, "总数据");
     }
 
     @SneakyThrows

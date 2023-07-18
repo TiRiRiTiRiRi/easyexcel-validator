@@ -28,3 +28,6 @@ spring:
       max-lifetime: 1800000
       # 数据库连接超时时间,默认30秒
       connection-timeout: 15000
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #开启sql日志
