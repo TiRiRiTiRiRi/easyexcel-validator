@@ -23,6 +23,12 @@
             width: 100%;
             height: 100%;
         }
+
+        .textbox {
+            width: 100%;
+            height: 26px;
+            padding: 1px;
+        }
     </style>
 </head>
 <body>
@@ -35,6 +41,26 @@
             pageNo: 1,
             pageSize: 10
         };
+
+        // 创建对话框 dialog
+        var dialog = $('#dlg').dialog({
+            closed: true,
+            modal: true,
+            width: 400,
+            height: 380,
+            title: '添加用户信息',
+            buttons: [{
+                text: '保存',
+                handler: function () {
+                    saveUserInformation();
+                }
+            }, {
+                text: '取消',
+                handler: function () {
+                    dialog.dialog('close');
+                }
+            }]
+        });
 
         // 页面加载完成后，创建数据表格 datagrid
         $("#tb").datagrid({
@@ -55,7 +81,7 @@
             toolbar: [
                 {
                     text: '添加', iconCls: 'icon-add', handler: function () {
-                        alert('添加...');
+                        showDialog();
                     }
                 },
                 {
@@ -75,7 +101,7 @@
                             url: 'http://localhost/api/personalInformation/delete',
                             type: 'POST',
                             contentType: 'application/json',
-                            data: JSON.stringify({ ids: ids }),
+                            data: JSON.stringify({ids: ids}),
                             success: function (response) {
                                 if (response.code === 200) {
                                     alert('删除成功！');
@@ -96,8 +122,13 @@
                     }
                 },
                 {
+                    text: '下载Excel模板', iconCls: 'icon-ok', handler: function () {
+                        downloadTemplate();
+                    }
+                },
+                {
                     text: '导入', iconCls: 'icon-back', handler: function () {
-                        alert('导入Excel...');
+                        importData();
                     }
                 },
                 {
@@ -118,11 +149,56 @@
                     }
                 });
             }
-        });
 
+        });
+        function importData() {
+            // 创建一个表单
+            var form = $('<form>').appendTo('body');
+            form.css('display', 'none');
+
+            // 创建一个文件输入框
+            var fileInput = $('<input type="file" name="file">').appendTo(form);
+
+            // 监听文件选择事件
+            fileInput.on('change', function () {
+                // 获取选中的文件
+                var file = this.files[0];
+
+                // 创建一个 FormData 对象，并将文件添加到其中
+                var formData = new FormData();
+                formData.append('file', file);
+
+                // 发送文件上传请求
+                $.ajax({
+                    url: 'http://localhost:80/api/personalInformation/import',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        if (response.code === 200) {
+                            alert('导入成功！');
+                            loadData();
+                        } else {
+                            console.log('导入失败:', response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('错误:', error);
+                    }
+                });
+            });
+
+            // 触发文件选择对话框
+            fileInput.click();
+        }
         // 加载数据
         loadData();
-
+        // 下载Excel模板
+        function downloadTemplate() {
+            var downloadUrl = 'http://localhost:80/api/personalInformation/exportTemplate';
+            window.open(downloadUrl, '_blank');
+        }
         // 获取数据并加载到表格中
         function loadData() {
             $.ajax({
@@ -153,7 +229,118 @@
         function exportExcel() {
             window.location.href = 'http://localhost:80/api/personalInformation/export';
         }
+
+        // 弹出对话框
+        function showDialog() {
+            dialog.dialog('open');
+        }
+
+        // 保存用户信息
+        function saveUserInformation() {
+            var userInformation = {
+                name: $('#name').val(),
+                nameSpelling: $('#nameSpelling').val(),
+                gender: $('#gender').combobox('getValue'),
+                identityCardType: $('#identityCardType').combobox('getValue'),
+                identityCardNumber: $('#identityCardNumber').val(),
+                birthday: $('#birthday').datetimebox('getValue'),
+                phone: $('#phone').val(),
+                email: $('#email').val()
+            };
+
+            // TODO: 进行表单验证
+
+            $.ajax({
+                url: 'http://localhost:80/api/personalInformation/new',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(userInformation),
+                success: function (response) {
+                    if (response.code === 200) {
+                        alert('保存成功！');
+                        loadData();
+                        dialog.dialog('close');
+                    } else {
+                        console.log('保存失败:', response.message);
+                        showErrorDialog('保存失败', response.data);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log('错误:', error);
+                    showErrorDialog('请求错误', '发生了一个错误，请重试！');
+                }
+            });
+        }
+
+        // 显示错误提示对话框
+        function showErrorDialog(title, data) {
+            $('<div>').appendTo('body')
+                .html('<div style="padding: 20px; font-size: 14px;">' + data + '</div>')
+                .dialog({
+                    title: title,
+                    modal: true,
+                    resizable: false,
+                    onClose: function () {
+                        $(this).dialog('destroy');
+                    }
+                });
+        }
+
+
+
     });
 </script>
+
+<!-- 对话框元素 -->
+<div id="dlg" class="easyui-dialog" style="padding: 20px;">
+    <form id="fm" method="post">
+        <table>
+            <tr>
+                <td>姓名：</td>
+                <td><input id="name" class="easyui-textbox" type="text" name="name" required="true" style="width: 100%">
+                </td>
+            </tr>
+            <tr>
+                <td>姓名全拼：</td>
+                <td><input id="nameSpelling" class="easyui-textbox" type="text" name="nameSpelling" required="true"
+                           style="width: 100%">
+                </td>
+            </tr>
+            <tr>
+                <td>性别：</td>
+                <td><input id="gender" class="easyui-combobox" name="gender"
+                           data-options="valueField: 'id', textField: 'text', data: [{id: '1', text: '男'}, {id: '2', text: '女'}], required: true"
+                           style="width: 100%"></td>
+            </tr>
+            <tr>
+                <td>身份证件类型：</td>
+                <td><input id="identityCardType" class="easyui-combobox" name="identityCardType"
+                           data-options="valueField: 'id', textField: 'text', data: [{id: '1', text: '居民身份证'}, {id: '2', text: '士官证'}, {id: '3', text: '学生证'}, {id: '4', text: '驾驶证'}, {id: '5', text: '护照'}, {id: '6', text: '港澳通行证'}], required: true"
+                           style="width: 100%"></td>
+            </tr>
+            <tr>
+                <td>身份证件号码：</td>
+                <td><input id="identityCardNumber" class="easyui-textbox" type="text" name="identityCardNumber"
+                           required="true" style="width: 100%"></td>
+            </tr>
+            <tr>
+                <td>出生日期：</td>
+                <td><input id="birthday" class="easyui-datetimebox" name="birthday" required="true" style="width: 100%">
+                </td>
+
+            </tr>
+            <tr>
+                <td>手机号码：</td>
+                <td><input id="phone" class="easyui-textbox" type="text" name="phone" required="true"
+                           style="width: 100%"></td>
+            </tr>
+            <tr>
+                <td>电子邮箱：</td>
+                <td><input id="email" class="easyui-textbox" type="text" name="email" required="true"
+                           style="width: 100%"></td>
+            </tr>
+        </table>
+    </form>
+</div>
 </body>
 </html>
