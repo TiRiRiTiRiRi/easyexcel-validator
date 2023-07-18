@@ -1,8 +1,10 @@
 package com.personnel.common.easyexecl;
+
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.personnel.common.exception.BaseException;
 import com.personnel.mapper.PersonnelInformationMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,19 +20,17 @@ import java.util.Set;
 @Component
 public class ExcelDataProcessor<T> {
     private final Validator validator;
-    private final BaseMapper baseMapper;
 
-    public ExcelDataProcessor(LocalValidatorFactoryBean validatorFactory, BaseMapper<T> baseMapper) {
+    public ExcelDataProcessor(LocalValidatorFactoryBean validatorFactory) {
         this.validator = validatorFactory.getValidator();
-        this.baseMapper = baseMapper;
     }
 
-
-
-    public void processUploadedExcel(InputStream inputStream, Class<T> dataType) {
-        EasyExcel.read(inputStream, dataType, new DataListener(validator))
-                .sheet().doRead();
+    public List<T> processUploadedExcel(InputStream inputStream, Class<T> dataType) {
+        DataListener dataListener = new DataListener(validator);
+        EasyExcel.read(inputStream, dataType, dataListener).sheet().doRead();
+        return dataListener.getDataList();
     }
+
     public class DataListener extends AnalysisEventListener<T> {
         private final List<T> dataList = new ArrayList<>();
         private final List<String> errorList = new ArrayList<>();
@@ -59,15 +59,17 @@ public class ExcelDataProcessor<T> {
                 for (String error : errorList) {
                     System.out.println(error);
                 }
+                throw new BaseException("数据格式有误");
             } else {
-                System.out.println("数据校验通过，校验通过的数据如下：");
-                for (T data : dataList) {
-                    System.out.println(data.toString());
-                    // 将数据保存到数据库
-                        baseMapper.insert(data);
-                }
+//                System.out.println("数据校验通过，校验通过的数据如下：");
+//                for (T data : dataList) {
+//                    System.out.println(data.toString());
+//                }
             }
+        }
+
+        public List<T> getDataList() {
+            return dataList;
         }
     }
 }
-

@@ -4,8 +4,8 @@ spring:
   #  修改上传文件大小
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 50MB
+      max-request-size: 50MB
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER

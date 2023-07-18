@@ -31,6 +31,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -111,16 +112,30 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
         createExcel(response, CollUtil.newArrayList(new UserInformationDto()), "模板");
     }
 
+    @SneakyThrows
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<String> importData(MultipartFile file) {
-        try {
-            System.out.println("上传的文件名：" + file.getOriginalFilename());
-            excelDataProcessor.processUploadedExcel(file.getInputStream(), UserInformationExcelDto.class);
-            return Result.success("上传成功");
-        } catch (Exception e) {
-            throw new BaseException("上传失败");
+        System.out.println("上传的文件名：" + file.getOriginalFilename());
+        // 获取excel数据并校验
+        List<UserInformationExcelDto> list = excelDataProcessor.processUploadedExcel(file.getInputStream(), UserInformationExcelDto.class);
+        // 获取要插入的数据
+        List<PersonnelInformation> importList = new ArrayList<>();
+        int i = 0;
+        for (UserInformationExcelDto userInformationExcelDto : list) {
+            importList.add(userInformationExcelDto.convert(PersonnelInformation.class));
+            // 批量保存防止oom
+            if (++i >= SAVE_ROW) {
+                // 批量注册进数据库
+                this.saveBatch(importList);
+                i = 0;
+                CollUtil.clear(importList);
+            }
         }
+        if (CollUtil.isNotEmpty(importList)) {
+            this.saveBatch(importList);
+        }
+        return Result.success("上传成功");
     }
 
     @SneakyThrows
