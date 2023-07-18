@@ -47,5 +47,10 @@ public interface PersonnelInformationService extends IService<PersonnelInformati
      */
     void exportTemplate(HttpServletResponse response);
 
+    /**
+     * 导入数据
+     * @param file
+     * @return
+     */
     Result<String> importData(MultipartFile file);
 }

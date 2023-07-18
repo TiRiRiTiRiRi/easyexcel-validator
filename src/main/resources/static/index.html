@@ -36,6 +36,34 @@
 
 <script>
     $(function () {
+
+        // 初始化表单组件
+        $('#name').textbox();
+        $('#nameSpelling').textbox();
+        $('#gender').combobox({
+            valueField: 'id',
+            textField: 'text',
+            data: [{id: '1', text: '男'}, {id: '2', text: '女'}],
+            required: true
+        });
+        $('#identityCardType').combobox({
+            valueField: 'id',
+            textField: 'text',
+            data: [
+                {id: '1', text: '居民身份证'},
+                {id: '2', text: '士官证'},
+                {id: '3', text: '学生证'},
+                {id: '4', text: '驾驶证'},
+                {id: '5', text: '护照'},
+                {id: '6', text: '港澳通行证'}
+            ],
+            required: true
+        });
+        $('#identityCardNumber').textbox();
+        $('#birthday').datetimebox();
+        $('#phone').textbox();
+        $('#email').textbox();
+
         // 存储分页数据的全局变量
         var paginationData = {
             pageNo: 1,
@@ -118,7 +146,7 @@
                 },
                 {
                     text: '修改', iconCls: 'icon-edit', handler: function () {
-                        alert('修改...');
+                        editData();
                     }
                 },
                 {
@@ -170,7 +198,7 @@
 
                 // 发送文件上传请求
                 $.ajax({
-                    url: 'http://localhost:80/api/personalInformation/import',
+                    url: 'http://localhost/api/personalInformation/import',
                     type: 'POST',
                     data: formData,
                     contentType: false,
@@ -194,9 +222,37 @@
         }
         // 加载数据
         loadData();
+
+        function editData() {
+            var rows = $('#tb').datagrid('getSelections');
+            if (rows.length === 0) {
+                alert('请选择要修改的数据！');
+                return;
+            }
+            if (rows.length > 1) {
+                alert('不能选择多行！');
+                return;
+            }
+
+            var selectedRow = rows[0]; // 获取选中的行数据
+
+            // 填充弹窗中的表单数据
+            $('#name').textbox('setValue', selectedRow.name);
+            $('#nameSpelling').textbox('setValue', selectedRow.nameSpelling);
+            $('#gender').combobox('setValue', selectedRow.gender);
+            $('#identityCardType').combobox('setValue', selectedRow.identityCardType);
+            $('#identityCardNumber').textbox('setValue', selectedRow.identityCardNumber);
+            $('#birthday').datetimebox('setValue', selectedRow.birthday);
+            $('#phone').textbox('setValue', selectedRow.phone);
+            $('#email').textbox('setValue', selectedRow.email);
+
+            // 打开弹窗
+            dialog.dialog('open');
+        }
+
         // 下载Excel模板
         function downloadTemplate() {
-            var downloadUrl = 'http://localhost:80/api/personalInformation/exportTemplate';
+            var downloadUrl = 'http://localhost/api/personalInformation/exportTemplate';
             window.open(downloadUrl, '_blank');
         }
         // 获取数据并加载到表格中
@@ -227,7 +283,7 @@
 
         // 导出Excel
         function exportExcel() {
-            window.location.href = 'http://localhost:80/api/personalInformation/export';
+            window.location.href = 'http://localhost/api/personalInformation/export';
         }
 
         // 弹出对话框
@@ -251,7 +307,7 @@
             // TODO: 进行表单验证
 
             $.ajax({
-                url: 'http://localhost:80/api/personalInformation/new',
+                url: 'http://localhost/api/personalInformation/new',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(userInformation),

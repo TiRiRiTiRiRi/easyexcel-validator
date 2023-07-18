@@ -1,5 +1,6 @@
 package com.personnel.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.personnel.common.base.dto.BaseDto;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,6 +58,7 @@ public class UserInformationUpdateDto extends BaseDto {
      * 出生日期
      */
     @NotNull(message = "生日不能为空")
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd")
     private Date birthday;
 
     /**

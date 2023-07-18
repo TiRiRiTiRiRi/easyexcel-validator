@@ -1,6 +1,7 @@
 package com.personnel.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -52,7 +53,7 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
     @Transactional
     public void saveMessage(UserInformationDto dto) {
         PersonnelInformation convert = dto.convert(PersonnelInformation.class);
-        this.save(convert);
+        this.save(convert.setNameSpelling(convert.getNameSpelling().toLowerCase()));
     }
 
     @Override
@@ -130,7 +131,11 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
         List<PersonnelInformation> importList = new ArrayList<>();
         int i = 0;
         for (UserInformationExcelDto userInformationExcelDto : list) {
-            importList.add(userInformationExcelDto.convert(PersonnelInformation.class));
+            // 添加数据
+            PersonnelInformation convert = userInformationExcelDto.convert(PersonnelInformation.class);
+            // 将拼音转换为小写
+            convert.setNameSpelling(convert.getNameSpelling().toLowerCase());
+            importList.add(convert);
             // 批量保存防止oom
             if (++i >= SAVE_ROW) {
                 // 批量注册进数据库
