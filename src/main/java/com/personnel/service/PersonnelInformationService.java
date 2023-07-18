@@ -6,6 +6,7 @@ import com.personnel.common.base.vo.PagingVo;
 import com.personnel.common.dto.UserInformationDeleteDto;
 import com.personnel.common.dto.UserInformationDto;
 import com.personnel.common.dto.UserInformationUpdateDto;
+import com.personnel.common.result.Result;
 import com.personnel.common.vo.PersonnelInformationVo;
 import com.personnel.model.PersonnelInformation;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,5 +47,5 @@ public interface PersonnelInformationService extends IService<PersonnelInformati
      */
     void exportTemplate(HttpServletResponse response);
 
-    void importData(MultipartFile file);
+    Result<String> importData(MultipartFile file);
 }

@@ -1,8 +1,6 @@
 package com.personnel.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -13,29 +11,34 @@ import com.personnel.common.base.qo.PagingQo;
 import com.personnel.common.base.vo.PagingVo;
 import com.personnel.common.dto.UserInformationDeleteDto;
 import com.personnel.common.dto.UserInformationDto;
+import com.personnel.common.dto.UserInformationExcelDto;
 import com.personnel.common.dto.UserInformationUpdateDto;
+import com.personnel.common.easyexecl.ExcelDataExporter;
+import com.personnel.common.easyexecl.ExcelDataProcessor;
 import com.personnel.common.exception.BaseException;
+import com.personnel.common.result.Result;
 import com.personnel.common.vo.PersonnelInformationVo;
 import com.personnel.mapper.PersonnelInformationMapper;
 import com.personnel.model.PersonnelInformation;
 import com.personnel.service.PersonnelInformationService;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInformationMapper, PersonnelInformation>
         implements PersonnelInformationService {
 
+    @Autowired
+    private ExcelDataProcessor excelDataProcessor;
 
     /**
      * 一次性保存行数
@@ -108,39 +111,15 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
         createExcel(response, CollUtil.newArrayList(new UserInformationDto()), "模板");
     }
 
-    @SneakyThrows
     @Override
-    @Transactional
-    public void importData(MultipartFile file) {
-        // 文件处理成io流
-        InputStream in = file.getInputStream();
-        // io流给ExcelReader
-        ExcelReader excelReader = ExcelUtil.getReader(in);
-        // 忽略第一行头(第一行是中文的情况),直接读取表的内容
-        List<List<Object>> list = excelReader.read(1);
-        ArrayList<PersonnelInformation> importList = new ArrayList<>();
-        int i = 0;
-        for (List<Object> row : list) {
-            importList.add(new PersonnelInformation()
-                    .setName(row.get(0).toString())
-                    .setNameSpelling(row.get(1).toString())
-                    .setGender(row.get(2).toString())
-                    .setIdentityCardType(row.get(3).toString())
-                    .setIdentityCardNumber(row.get(4).toString())
-                    .setBirthday(DateUtil.parse(row.get(5).toString()))
-                    .setPhone(row.get(6).toString())
-                    .setEmail(row.get(7).toString())
-            );
-            // 批量保存防止oom
-            if (++i >= SAVE_ROW) {
-                // 批量注册进数据库
-                this.saveBatch(importList);
-                i = 0;
-                CollUtil.clear(importList);
-            }
-        }
-        if (CollUtil.isNotEmpty(importList)) {
-            this.saveBatch(importList);
+    @Transactional(rollbackFor = Exception.class)
+    public Result<String> importData(MultipartFile file) {
+        try {
+            System.out.println("上传的文件名：" + file.getOriginalFilename());
+            excelDataProcessor.processUploadedExcel(file.getInputStream(), UserInformationExcelDto.class);
+            return Result.success("上传成功");
+        } catch (Exception e) {
+            throw new BaseException("上传失败");
         }
     }
 
