@@ -17,7 +17,7 @@ public class ExcelDataExporter {
         try {
             String encodedFileName = URLEncoder.encode(fileName, "UTF-8"); // 对文件名进行 URL 编码
             response.setContentType("application/vnd.ms-excel"); // 设置响应类型为 Excel
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\""); // 设置响应头，告诉客户端以附件形式下载文件
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + ".xlsx\""); // 设置响应头，告诉客户端以附件形式下载文件
 
             OutputStream outputStream = response.getOutputStream();
             EasyExcel.write(outputStream, dataType).sheet("Sheet1").doWrite(dataList);

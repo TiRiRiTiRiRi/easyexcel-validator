@@ -20,6 +20,7 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
+@Accessors(chain = true)
 public class UserInformationExcelDto extends BaseDto {
 
 

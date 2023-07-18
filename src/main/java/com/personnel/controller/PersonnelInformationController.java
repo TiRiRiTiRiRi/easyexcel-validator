@@ -35,7 +35,7 @@ public class PersonnelInformationController {
      * 获取用户信息
      */
     @PostMapping("/getMessage")
-    public Result<PagingVo<PersonnelInformationVo>> getMessage(@Validated PagingQo qo) {
+    public Result<PagingVo<PersonnelInformationVo>> getMessage(@RequestBody @Validated PagingQo qo) {
         return Result.success(personnelInformationService.getMessage(qo));
     }
 

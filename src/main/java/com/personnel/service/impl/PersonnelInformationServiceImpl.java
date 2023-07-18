@@ -13,6 +13,7 @@ import com.personnel.common.dto.UserInformationDeleteDto;
 import com.personnel.common.dto.UserInformationDto;
 import com.personnel.common.dto.UserInformationExcelDto;
 import com.personnel.common.dto.UserInformationUpdateDto;
+import com.personnel.common.easyexcel.ExcelDataExporter;
 import com.personnel.common.easyexcel.ExcelDataProcessor;
 import com.personnel.common.easyexcel.ExcelTemplateUtil;
 import com.personnel.common.exception.BaseException;
@@ -91,9 +92,9 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
     public void exportData(HttpServletResponse response) {
         List<PersonnelInformation> list = this.lambdaQuery().orderByDesc(BaseEntity::getCreateTime).list();
         System.out.println("list = " + list);
-        List<UserInformationDto> convertList = list.stream().map(
+        List<UserInformationExcelDto> convertList = list.stream().map(
                 entity ->
-                        new UserInformationDto()
+                        new UserInformationExcelDto()
                                 .setName(entity.getName())
                                 .setNameSpelling(entity.getNameSpelling())
                                 .setGender(entity.getGender())
@@ -104,7 +105,7 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
                                 .setEmail(entity.getEmail())
 
         ).toList();
-        createExcel(response, convertList, "总数据");
+        ExcelDataExporter.exportDataToExcel(convertList,response, UserInformationExcelDto.class,"总数据");
     }
 
     @SneakyThrows
@@ -138,35 +139,5 @@ public class PersonnelInformationServiceImpl extends ServiceImpl<PersonnelInform
         }
         return Result.success("上传成功");
     }
-
-    @SneakyThrows
-    private void createExcel(HttpServletResponse response, List dataList, String fileName) { // 查询导出订单数据
-        if (CollUtil.isEmpty(dataList)) {
-            throw new BaseException("暂无数据！");
-        }
-        //在内存操作，写到浏览器
-        ExcelWriter writer = ExcelUtil.getWriter(true);
-        //自定义标题别名
-        writer.addHeaderAlias("name", "姓名");
-        writer.addHeaderAlias("nameSpelling", "姓名全拼");
-        writer.addHeaderAlias("gender", "性别");
-        writer.addHeaderAlias("identityCardType", "身份证件类型");
-        writer.addHeaderAlias("identityCardNumber", "身份证件号码");
-        writer.addHeaderAlias("birthday", "出生日期");
-        writer.addHeaderAlias("phone", "手机号码");
-        writer.addHeaderAlias("email", "电子邮箱");
-        //默认配置
-        writer.write(dataList, true);
-        //设置content—type
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset:utf-8");
-        //Content-disposition是MIME协议的扩展，MIME协议指示MIME用户代理如何显示附加的文件。
-        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8) + ".xlsx");
-        ServletOutputStream outputStream = response.getOutputStream();
-        //将Writer刷新到OutPut
-        writer.flush(outputStream, true);
-        outputStream.close();
-        writer.close();
-    }
-
 
 }
