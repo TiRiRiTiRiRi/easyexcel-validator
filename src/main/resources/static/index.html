@@ -41,6 +41,8 @@
     </style>
 </head>
 <body>
+<input id="id" type="hidden" name="id">
+
 <table id="tb" title="人员信息表"></table>
 <script>
     $(function () {
@@ -88,7 +90,12 @@
             buttons: [{
                 text: '保存',
                 handler: function () {
-                    saveUserInformation();
+                    var id = $('#id').val();
+                    if (id) {
+                        updatePersonalInformation();
+                    } else {
+                        saveUserInformation();
+                    }
                 }
             }, {
                 text: '取消',
@@ -128,7 +135,7 @@
             toolbar: [
                 {
                     text: '添加', iconCls: 'icon-add', handler: function () {
-                        showDialog();
+                        addData();
                     }
                 },
                 {
@@ -199,6 +206,22 @@
 
         });
 
+        function addData() {
+            // 清空弹窗中的表单数据
+            $('#id').val('');
+            $('#name').textbox('clear');
+            $('#nameSpelling').textbox('clear');
+            $('#gender').combobox('clear');
+            $('#identityCardType').combobox('clear');
+            $('#identityCardNumber').textbox('clear');
+            $('#birthday').datetimebox('clear');
+            $('#phone').textbox('clear');
+            $('#email').textbox('clear');
+
+            // 打开弹窗
+            dialog.dialog('open');
+        }
+
         function importData() {
             // 创建一个表单
             var form = $('<form>').appendTo('body');
@@ -258,6 +281,7 @@
             var selectedRow = rows[0]; // 获取选中的行数据
 
             // 填充弹窗中的表单数据
+            $('#id').val(selectedRow.id);
             $('#name').textbox('setValue', selectedRow.name);
             $('#nameSpelling').textbox('setValue', selectedRow.nameSpelling);
             $('#gender').combobox('setValue', selectedRow.gender);
@@ -350,6 +374,45 @@
             });
         }
 
+        // 更新个人信息
+        function updatePersonalInformation() {
+            var id = $('#id').val();
+            var userInformation = {
+                id: id,
+                name: $('#name').val(),
+                nameSpelling: $('#nameSpelling').val(),
+                gender: $('#gender').combobox('getValue'),
+                identityCardType: $('#identityCardType').combobox('getValue'),
+                identityCardNumber: $('#identityCardNumber').val(),
+                birthday: $('#birthday').datetimebox('getValue'),
+                phone: $('#phone').val(),
+                email: $('#email').val()
+            };
+
+            // TODO: 进行表单验证
+
+            $.ajax({
+                url: 'http://localhost/api/personalInformation/update',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(userInformation),
+                success: function (response) {
+                    if (response.code === 200) {
+                        alert('保存成功！');
+                        loadData();
+                        dialog.dialog('close');
+                    } else {
+                        console.log('保存失败:', response.message);
+                        showErrorDialog('保存失败', response.data);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log('错误:', error);
+                    showErrorDialog('请求错误', '发生了一个错误，请重试！');
+                }
+            });
+        }
+
         // 显示错误提示对话框
         function showErrorDialog(title, data) {
             $('<div>').appendTo('body')
@@ -419,4 +482,3 @@
 </div>
 </body>
 </html>
-
